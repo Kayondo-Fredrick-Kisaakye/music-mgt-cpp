@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Favorite Music Manager</title>
+<style>
+  body {
+    margin: 0;
+    background: #6b8cae;
+    font-family: "Microsoft Sans Serif", Tahoma, "Segoe UI", Arial, sans-serif;
+    font-size: 12px;
+    color: #000;
+  }
+  .window {
+    max-width: 920px;
+    margin: 20px auto;
+    background: #f0f0f0;
+    border: 1px solid #3a4f6b;
+    box-shadow: 3px 3px 12px rgba(0,0,0,.5);
+  }
+  .titlebar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 5px 6px 5px 8px;
+    background: linear-gradient(#dbe8f7, #b9d1ee 50%, #a9c5e8 51%, #c1d8f1);
+    border-bottom: 1px solid #7f9db9;
+    font-size: 12px; font-weight: bold;
+  }
+  .titlebar .btns span {
+    display: inline-block; width: 24px; height: 17px; margin-left: 2px;
+    text-align: center; line-height: 17px; font-size: 11px;
+    border: 1px solid #6d7f99; border-radius: 3px;
+    background: linear-gradient(#f4f8fc, #cddcf0);
+  }
+  .titlebar .btns span.close { background: linear-gradient(#e9a99b, #c9402a); color: #fff; width: 38px; }
+  .content { display: flex; gap: 10px; padding: 10px; }
+  fieldset {
+    border: 1px solid #b0b0b0; margin: 0; padding: 8px 10px 10px;
+  }
+  legend { padding: 0 3px; }
+  .left { width: 260px; flex: none; }
+  .right { flex: 1; min-width: 0; }
+  .row { display: flex; align-items: center; margin-bottom: 6px; }
+  .row label { width: 60px; flex: none; }
+  .row input, .row select { flex: 1; min-width: 0; }
+  input, select {
+    border: 1px solid #7a7a7a; background: #fff;
+    height: 21px; padding: 1px 3px; box-sizing: border-box;
+    font: inherit;
+  }
+  button {
+    font: inherit; min-width: 75px; height: 23px; padding: 0 8px;
+    border: 1px solid #707070; border-radius: 3px;
+    background: linear-gradient(#f2f2f2 0%, #ebebeb 49%, #dddddd 50%, #cfcfcf 100%);
+    cursor: pointer;
+  }
+  button:hover:not(:disabled) {
+    border-color: #3c7fb1;
+    background: linear-gradient(#eaf6fd 0%, #d9f0fc 49%, #bee6fd 50%, #a7d9f5 100%);
+  }
+  button:active:not(:disabled) {
+    border-color: #2c628b;
+    background: linear-gradient(#e5f4fc 0%, #c4e5f6 49%, #98d1ef 50%, #68b3db 100%);
+  }
+  button:disabled { color: #a0a0a0; border-color: #adb2b5; background: #f4f4f4; cursor: default; }
+  .buttons { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .toolbar { display: flex; gap: 6px; margin-bottom: 8px; }
+  .toolbar input { flex: 1; min-width: 0; }
+  .grid {
+    border: 1px solid #828790; background: #fff;
+    height: 340px; overflow: auto;
+  }
+  table { border-collapse: collapse; width: 100%; }
+  th {
+    position: sticky; top: 0; text-align: left; font-weight: normal;
+    padding: 3px 6px; white-space: nowrap;
+    background: linear-gradient(#fff, #ebebeb);
+    border-right: 1px solid #d0d0d0; border-bottom: 1px solid #c0c0c0;
+  }
+  td {
+    padding: 3px 6px; white-space: nowrap;
+    border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e8e8e8;
+  }
+  tr.selected td { background: #3399ff; color: #fff; }
+  tbody tr { cursor: default; }
+  .status {
+    border-top: 1px solid #c8c8c8; padding: 3px 8px; background: #f0f0f0;
+    display: flex; justify-content: space-between;
+  }
+  @media (max-width: 720px) {
+    .window { margin: 0; }
+    .content { flex-direction: column; }
+    .left { width: auto; }
+    body { font-size: 14px; }
+    input, select, button { height: 30px; }
+  }
+</style>
+</head>
+<body>
+<div class="window">
+  <div class="titlebar">
+    <span>Favorite Music Manager</span>
+    <span class="btns"><span>&#8212;</span><span>&#9633;</span><span class="close">X</span></span>
+  </div>
+
+  <div class="content">
+    <fieldset class="left">
+      <legend>Song Details</legend>
+      <div class="row"><label for="title">Title:</label><input id="title" maxlength="200"></div>
+      <div class="row"><label for="artist">Artist:</label><input id="artist" maxlength="200"></div>
+      <div class="row"><label for="album">Album:</label><input id="album" maxlength="200"></div>
+      <div class="row"><label for="genre">Genre:</label><input id="genre" maxlength="100"></div>
+      <div class="row"><label for="year">Year:</label><input id="year" type="number" min="1900" max="2100"></div>
+      <div class="row"><label for="rating">Rating:</label>
+        <select id="rating">
+          <option value="">(select)</option>
+          <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+        </select>
+      </div>
+      <div class="buttons">
+        <button id="btnAdd">Add</button>
+        <button id="btnUpdate" disabled>Update</button>
+        <button id="btnDelete" disabled>Delete</button>
+        <button id="btnClear">Clear</button>
+      </div>
+    </fieldset>
+
+    <fieldset class="right">
+      <legend>Song List</legend>
+      <div class="toolbar">
+        <input id="search" placeholder="Search title, artist, album, genre">
+        <button id="btnSearch">Search</button>
+        <button id="btnAll">Show All</button>
+      </div>
+      <div class="grid">
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Title</th><th>Artist</th><th>Album</th><th>Genre</th><th>Year</th><th>Rating</th></tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </fieldset>
+  </div>
+
+  <div class="status"><span id="status">Ready</span><span id="count"></span></div>
+</div>
+
+<script>
+  var selectedId = null;
+  var songs = [];
+
+  function $(id) { return document.getElementById(id); }
+  function setStatus(t) { $('status').textContent = t; }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  async function api(method, url, body) {
+    var res = await fetch(url, {
+      method: method,
+      headers: { 'Content-Type': 'application/json' },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    var data = {};
+    try { data = await res.json(); } catch (e) {}
+    if (!res.ok) throw new Error(data.error || ('Error ' + res.status));
+    return data;
+  }
+
+  function readForm() {
+    return {
+      title: $('title').value.trim(),
+      artist: $('artist').value.trim(),
+      album: $('album').value.trim(),
+      genre: $('genre').value.trim(),
+      year: parseInt($('year').value, 10) || 0,
+      rating: parseInt($('rating').value, 10) || 0
+    };
+  }
+
+  function clearForm() {
+    selectedId = null;
+    ['title', 'artist', 'album', 'genre', 'year', 'rating'].forEach(function (f) { $(f).value = ''; });
+    $('btnUpdate').disabled = true;
+    $('btnDelete').disabled = true;
+    $('btnAdd').disabled = false;
+    render();
+  }
+
+  function render() {
+    var html = '';
+    songs.forEach(function (s) {
+      html += '<tr data-id="' + s.id + '"' + (s.id === selectedId ? ' class="selected"' : '') + '>' +
+        '<td>' + s.id + '</td><td>' + esc(s.title) + '</td><td>' + esc(s.artist) + '</td>' +
+        '<td>' + esc(s.album) + '</td><td>' + esc(s.genre) + '</td><td>' + s.year + '</td>' +
+        '<td>' + s.rating + '/5</td></tr>';
+    });
+    $('rows').innerHTML = html;
+    $('count').textContent = songs.length + ' song(s)';
+  }
+
+  async function loadSongs(q) {
+    try {
+      setStatus('Loading...');
+      songs = await api('GET', '/api/songs' + (q ? '?q=' + encodeURIComponent(q) : ''));
+      render();
+      setStatus('Ready');
+    } catch (e) {
+      setStatus('Error');
+      alert(e.message);
+    }
+  }
+
+  $('rows').addEventListener('click', function (ev) {
+    var tr = ev.target.closest('tr');
+    if (!tr) return;
+    var id = parseInt(tr.getAttribute('data-id'), 10);
+    var s = songs.find(function (x) { return x.id === id; });
+    if (!s) return;
+    selectedId = id;
+    $('title').value = s.title;
+    $('artist').value = s.artist;
+    $('album').value = s.album;
+    $('genre').value = s.genre;
+    $('year').value = s.year;
+    $('rating').value = s.rating;
+    $('btnUpdate').disabled = false;
+    $('btnDelete').disabled = false;
+    $('btnAdd').disabled = true;
+    render();
+  });
+
+  $('btnAdd').onclick = async function () {
+    try {
+      await api('POST', '/api/songs', readForm());
+      setStatus('Song added.');
+      clearForm();
+      await loadSongs($('search').value.trim());
+    } catch (e) { alert(e.message); }
+  };
+
+  $('btnUpdate').onclick = async function () {
+    if (selectedId === null) return;
+    try {
+      await api('PUT', '/api/songs/' + selectedId, readForm());
+      setStatus('Song updated.');
+      clearForm();
+      await loadSongs($('search').value.trim());
+    } catch (e) { alert(e.message); }
+  };
+
+  $('btnDelete').onclick = async function () {
+    if (selectedId === null) return;
+    if (!confirm('Are you sure you want to delete this song?')) return;
+    try {
+      await api('DELETE', '/api/songs/' + selectedId);
+      setStatus('Song deleted.');
+      clearForm();
+      await loadSongs($('search').value.trim());
+    } catch (e) { alert(e.message); }
+  };
+
+  $('btnClear').onclick = clearForm;
+  $('btnSearch').onclick = function () { loadSongs($('search').value.trim()); };
+  $('btnAll').onclick = function () { $('search').value = ''; loadSongs(''); };
+  $('search').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') loadSongs($('search').value.trim());
+  });
+
+  loadSongs('');
+</script>
+</body>
+</html>
